@@ -155,7 +155,6 @@
 					<td>
 						<img src="http://40.media.tumblr.com/c2855fde171362f27e05dd8b5f2b6a0d/tumblr_nv326chULG1st5lhmo1_1280.jpg" style="border-radius:100px;width:40px;height:40px;"/>
 					</td>
-					<td><b>asdasdas das dasdasd asdasdasd asdas das dasda sda sdasd asdasdasdasd</b></td>
 				</tr>
 				<tr>
 					<td>
