@@ -1,0 +1,227 @@
+	$data["name"] = $session_data["fullname"];
+			$data["usertype"] = $session_data["usertype"];
+			$data["review_count"] = $this->list_model->review_count($session_data["id"]);
+			$this->load->view("menu/menu",$data);
+			
+			$edit_profile = false;
+			$data["edit_profile"] = false;
+			$id = $session_data["id"];
+			IF(isset($_GET["id"]))
+			{
+				$id = $_GET["id"];
+			}
+			
+			if(isset($_GET["id"]))
+			{
+				$id = $_GET["id"];
+			}
+			
+			$data["user_info"] = $this->list_model->get_user_info($id);
+			$data["schedule_time"] = $this->list_model->schedule_time();
+			$data["schedule"] = $this->list_model->get_schedule($id);
+			$schedule = $data["schedule"];
+			$user_info = $data["user_info"];
+			$schedule_time = $data["schedule_time"];
+			$schedule = $data["schedule"];
+			
+			$mandarin = $this->list_model->mandarin_level();
+			foreach($user_info as $ui)
+			{
+				if(isset($_GET["edit"]) and $_GET["edit"] == true)
+				{
+					$edit_profile = true;
+					$data["edit_profile"] = $edit_profile;
+				}
+				
+				if($edit_profile == false)
+				{
+					$data["user_id"] = NULL;
+					$data["email"] = $ui->email;
+					$data["password"] = $ui->password;
+					$data["last_name"] = $ui->last_name;
+					$data["first_name"] = $ui->first_name;
+					$data["current_location"] = $ui->current_location;
+					$data["gender"] = $ui->gender;
+					$data["birthday"] = date("m/d/Y",strtotime($ui->birthday));
+					$data["photo"] = "<img src='".base_url().$ui->photo."' style='width:144px;height:144px'></td>";
+					$data["native_language"] = $ui->native_language;
+					$data["mandarin_level"] = $ui->mandarin_level;
+					$data["teaching_exp"] = $ui->teaching_exp;
+					$data["occupation"] = $ui->occupation;
+					$data["lesson_frequency"] = $ui->lesson_frequency." times a week";
+					$my_schedule = "";
+					$day = 0;
+					while($day < 7){
+						if($day == 0){$name = "monday";}
+						else if($day == 1){$name = "tuesday";}
+						else if($day == 2){$name = "wednesday";}
+						else if($day == 3){$name = "thursday";}
+						else if($day == 4){$name = "friday";}
+						else if($day == 5){$name = "saturday";}
+						else if($day == 6){$name = "sunday";}
+						$index = 0;
+						foreach($schedule_time as $st){
+								foreach($schedule as $s)
+								{
+									if($s->$name == $st->id)
+									{	
+										$my_schedule = $my_schedule . $st->time."</br>";
+									}
+								}
+							$index++;
+						}
+						$day++;
+					}					
+					$data["my_schedule"] = $my_schedule;
+					$data["preferred_location"] = $ui->preferred_location;
+					$data["about_me"] = $ui->about_me;
+					
+				}
+				else if($edit_profile == true)
+				{
+					$data["user_id"] = "<input type='hidden' name='user_id' value='$ui->id'/>"; 
+					$data["email"] = "<input type='text' name='email' value='$ui->email'/>"; 
+					$data["password"] = "<input type='text' name='password' value='$ui->password'/>"; 
+					$data["last_name"] = "<input type='text' name='last_name' value='$ui->last_name'/>"; 
+					$data["first_name"] = "<input type='text' name='first_name' value='$ui->first_name'/>"; 
+					$data["current_location"] = "<input type='text' name='current_location' value='$ui->current_location'/>"; 
+
+					$gender = "<input type='radio' name='gender' value='male'";
+						if($ui->gender == "male")
+						{
+							$gender = $gender . "checked";
+						}
+					$gender = $gender . "/>Male <input type='radio' name='gender' value='female'";
+						if($ui->gender == "female")
+						{
+							$gender = $gender . "checked";
+						}
+					$gender = $gender . "/>Female";
+					$data["gender"] = $gender;
+					
+					$data["birthday"] = "<input type='input' name='birthday' id='datepicker' value='".date("m/d/Y",strtotime($ui->birthday))."'/>";
+
+					$photo = "<img id='image' src='";
+					$photo = $photo . base_url();
+					$photo = $photo ."$ui->photo' style='width:144px;height:144px' onclick='previous();'></br>
+								<div id='message'>Click image for previous one</div>
+								<input type='file' name='photo' value='$ui->photo' id='photo' onChange='readURL(this);'>";
+					$data["photo"] = $photo;
+					
+					$data["native_language"] = "<input type='text' name='native_language' value='$ui->native_language'/>";
+
+					$mandarin_level = "";
+					foreach($mandarin as $ml)
+					{
+						$mandarin_level = $mandarin_level . "<input type='radio' name='mandarin_level' value='$ml->level'";
+							if($ml->level == $ui->mandarin_level)
+							{
+								$mandarin_level = $mandarin_level ."checked";
+							}
+						$mandarin_level = $mandarin_level . "/>$ml->level</br>";
+					}
+					$data["mandarin_level"] = $mandarin_level;
+					
+					$lesson_frequency = "<select name='lesson_frequency'>";
+					
+					$index = 0;
+					while($index < 8)
+					{
+						$lesson_frequency = $lesson_frequency . "<option value ='$index'";
+							if($index == $ui->lesson_frequency)
+							{
+								$lesson_frequency = $lesson_frequency . "selected";
+							}
+						$lesson_frequency = $lesson_frequency . ">$index</option>";
+						$index++;
+					}
+					$lesson_frequency = $lesson_frequency . "</select> times a week";
+					$data["lesson_frequency"] = $lesson_frequency;
+					
+					$occupation = "<input type='radio' name='occupation'";
+						if($ui->occupation == "Student")
+						{
+							$occupation = $occupation . "checked=checked";
+						}
+					$occupation = $occupation . "value='Student'/>Student
+					</br><input type='radio' name='occupation'";
+						if($ui->occupation == "Full time Job")
+						{
+							$occupation = $occupation . "checked=checked";
+						}
+					$occupation = $occupation . "value='Full time Job'/>Full time Job</br><input type='radio' name='occupation'"; 
+						if($ui->occupation == "Part Time Job")
+						{
+							$occupation = $occupation . "checked=checked";
+						}					
+					$occupation = $occupation . "value='Part Time Job'/>Part Time Job</br><input type='radio' name='occupation'";
+						if($ui->occupation == "Unemployed")
+						{
+							$occupation = $occupation . "checked";
+						}					
+					$data["occupation"] = $occupation . "value='Unemployed'/>Unemployed	";
+					
+					$data["teaching_exp"] = "<input type='text' name='teaching_exp' value='$ui->teaching_exp'/>";
+					
+					$my_schedule = "";
+					$day = 0;
+					while($day < 7){
+						if($day == 0){$name = "monday";}
+						else if($day == 1){$name = "tuesday";}
+						else if($day == 2){$name = "wednesday";}
+						else if($day == 3){$name = "thursday";}
+						else if($day == 4){$name = "friday";}
+						else if($day == 5){$name = "saturday";}
+						else if($day == 6){$name = "sunday";}
+						$index = 0;
+						$my_schedule = $my_schedule . "<select id='$name' name='$name'>";
+								foreach($schedule_time as $st){
+									$my_schedule = $my_schedule . "<option name='$name' value='$st->id'";
+										foreach($schedule as $s)
+										{
+											if($s->$name == $st->id)
+											{	
+												$my_schedule = $my_schedule . "selected";
+											}
+										}
+									$my_schedule = $my_schedule . ">$st->time</option>"; 
+									$index++;
+								}
+								$my_schedule = $my_schedule . "</select></br>";
+						$day++;
+					}						
+					$data["my_schedule"] = $my_schedule;
+					
+					$s = array();
+					$null_all = 0;
+					foreach($schedule as $sch)
+					{
+						if($sch->monday != NULL){$s[0] = explode(",", $sch->monday);}else{$null_all++;}
+						if($sch->tuesday != NULL){$s[1] = explode(",", $sch->tuesday);}else{$null_all++;}
+						if($sch->wednesday != NULL){$s[2] = explode(",", $sch->wednesday);}else{$null_all++;}
+						if($sch->thursday != NULL){$s[3] = explode(",", $sch->thursday);}else{$null_all++;}
+						if($sch->friday != NULL){$s[4] = explode(",", $sch->friday);}else{$null_all++;}
+						if($sch->saturday != NULL){$s[5] = explode(",", $sch->saturday);}else{$null_all++;}
+						if($sch->sunday != NULL){$s[6] = explode(",", $sch->sunday);}else{$null_all++;}
+					}
+					if($null_all != 7)
+					{
+						$data["sched"] = $s;
+					}
+					else
+					{
+						$data["sched"] = NULL;
+					}
+					
+					$data["preferred_location"] = "<input type='text' name='preferred_location' value='$ui->preferred_location'/>"; 
+					$data["about_me"] = "<input type='text' name='about_me' value='$ui->about_me'/>"; 
+					$data["button"] = "<input type='submit' name='submit' value='submit'/>"; 
+				}
+			}
+			
+			$view_teacher = false;
+			if(isset($_GET["teacher"]))
+			{
+				$view_teacher = true;
+			}
+			
